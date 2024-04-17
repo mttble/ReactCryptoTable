@@ -1,7 +1,10 @@
+import CryptoDataTable from "./components/CryptoTable";
 import { DataTableDemo } from "./components/Home";
+
 
 function App() {
   return (
+
     <>
     <div style={{ width: '80%', margin: 'auto' }}>
       <h1 className="text-4xl font-bold">React Crypto Table Demo</h1>
@@ -10,7 +13,7 @@ function App() {
       </p>
     </div>
     <div style={{ width: '80%', margin: 'auto' }}>
-      <DataTableDemo />
+      <CryptoDataTable/>
     </div>
     </>
   );
