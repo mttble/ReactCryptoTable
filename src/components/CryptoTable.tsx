@@ -23,57 +23,97 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { table } from "console";
 
 const columns: ColumnDef<CryptoData>[] = [
-  {
-    accessorKey: "market_cap_rank", // Use market cap rank as accessor key
-    header: "Market Cap Rank", // Display "Market Cap Rank" in the header
-    cell: ({ row }) => <div>{row.getValue("market_cap_rank")}</div>, // Render market cap rank in the cell
-  },
-  {
-    accessorKey: "name",
-    header: "Coin",
-    cell: ({ row }) => (
-      <div className="flex items-center">
-        <img src={row.original.image} alt={row.getValue("name")} className="w-8 h-8 mr-2" />
-        <div>{row.getValue("name")}</div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "current_price",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Price
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>${row.getValue("current_price")}</div>,
-  },
-  {
-    accessorKey: "symbol",
-    header: "Symbol",
-    cell: ({ row }) => <div>{row.getValue("symbol")}</div>,
-  },
-  {
-    accessorKey: "price_change_percentage_24h",
-    header: "Change (24h)",
-    cell: ({ row }) => <div>{row.getValue("price_change_percentage_24h")}</div>,
-  },
-];
+    {
+      accessorKey: "market_cap_rank",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Market Cap Rank
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("market_cap_rank")}</div>,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Coin
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <img src={row.original.image} alt={row.getValue("name")} className="w-8 h-8 mr-2" />
+          <div>{row.getValue("name")}</div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "current_price",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Price
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>${row.getValue("current_price")}</div>,
+    },
+    {
+      accessorKey: "market_cap",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Market Cap
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>${row.original.market_cap.toLocaleString()}</div>,
+    },
+    {
+        accessorKey: "price_change_percentage_24h",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Change (24h)
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div style={{ color: Number(row.original.price_change_percentage_24h) < 0 ? 'red' : 'green' }}>
+            {parseFloat(row.getValue("price_change_percentage_24h")).toFixed(3)}%
+          </div>
+        ),
+      },
+  ];
+  
+  
 
-interface CryptoData {
-  id: string;
-  name: string;
-  current_price: number;
-  symbol: string;
-  price_change_percentage_24h: string;
-  market_cap_rank: number; // Add market_cap_rank to CryptoData interface
-  image: string; // Add image property to CryptoData interface
-}
+  interface CryptoData {
+    id: string;
+    name: string;
+    current_price: number;
+    symbol: string;
+    price_change_percentage_24h: string;
+    market_cap_rank: number;
+    image: string;
+    market_cap: number;
+  }
 
 const CryptoDataTable: React.FC = () => {
   const [cryptoData, setCryptoData] = useState<CryptoData[]>([]);
@@ -86,19 +126,24 @@ const CryptoDataTable: React.FC = () => {
     fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd")
       .then((response) => response.json())
       .then((data) => {
-        const cryptoDataArray: CryptoData[] = data.map((item: any) => ({
+        console.log(data); // Log the fetched data
+        const sortedData = data.sort((a: any, b: any) => a.market_cap_rank - b.market_cap_rank);
+        const cryptoDataArray: CryptoData[] = sortedData.map((item: any) => ({
           id: item.id,
           name: item.name,
           current_price: item.current_price,
           symbol: item.symbol,
           price_change_percentage_24h: item.price_change_percentage_24h,
-          market_cap_rank: item.market_cap_rank, // Assign market cap rank
-          image: item.image, // Assign image URL
+          market_cap_rank: item.market_cap_rank,
+          image: item.image,
+          market_cap: item.market_cap,
         }));
         setCryptoData(cryptoDataArray);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+  
+  
 
   const table = useReactTable({
     data: cryptoData,
