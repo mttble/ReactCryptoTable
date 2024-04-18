@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { table } from "console";
+
 
 const columns: ColumnDef<CryptoData>[] = [
     {
